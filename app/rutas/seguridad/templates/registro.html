@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registrarse - DIGI-LIBROS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+<body>
+  <div class="container mt-5">
+    <h2 class="text-center mb-4">Crear una cuenta</h2>
+
+    <!-- Mensajes flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="alert alert-warning">
+          {% for category, message in messages %}
+            <strong>{{ category.capitalize() }}:</strong> {{ message }}
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <form method="post" action="{{ url_for('login.registro') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          
+          <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre completo</label>
+            <input type="text" class="form-control" id="nombre" name="usuario_nombre" required />
+          </div>
+          <div class="mb-3">
+            <label for="telefono" class="form-label">Teléfono</label>
+            <input type="text" class="form-control" id="telefono" name="telefono" required />
+          </div>
+         <div class="mb-3">
+  <label for="usuario_email" class="form-label">Correo electrónico</label>
+  <input type="email" class="form-control" id="usuario_email" name="usuario_email" required />
+</div>
+
+        
+         <div class="mb-3">
+  <label for="usuario_clave" class="form-label">Contraseña</label>
+  <input type="password" class="form-control" id="usuario_clave" name="usuario_clave" required />
+
+          </div>
+          <button type="submit" class="btn btn-success w-100">Registrarse</button>
+        </form>
+        <div class="text-center mt-3">
+          <a href="{{ url_for('login.login') }}">¿Ya tienes cuenta? Inicia sesión</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

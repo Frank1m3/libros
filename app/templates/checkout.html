@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout - DIGI-LIBROS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+      <a class="navbar-brand" href="/app/templates/base.html">DIGI-LIBROS</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="/app/templates/tienda.html">Tienda</a></li>
+          <li class="nav-item"><a class="nav-link" href="/app/templates/contactos.html">Contacto</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenido principal -->
+  <main class="container my-5">
+    <h2 class="mb-4 text-center">Resumen de tu pedido</h2>
+    <div class="row">
+      <!-- Sección principal -->
+      <div class="col-lg-8">
+        <!-- Carrito -->
+        <div class="card mb-4">
+          <div class="card-header bg-primary text-white">
+            Carrito de compras
+          </div>
+          <div class="card-body">
+            <ul id="carritoResumen" class="list-group mb-3"></ul>
+            <h5 class="text-end">Total: $<span id="totalCarrito">0</span></h5>
+          </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="card mb-4">
+          <div class="card-header bg-secondary text-white">
+            Datos del comprador
+          </div>
+          <div class="card-body">
+            <!-- Botones de registro/login -->
+            <div class="mb-4 text-end">
+              <a href="/app/templates/registrar.html" class="btn btn-outline-primary me-2">Crear cuenta</a>
+              <a class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">login</a>
+            </div>
+
+            <form id="formularioPago">
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="nombre" class="form-label">Nombre Completo</label>
+                  <input type="text" class="form-control" id="nombre" required>
+                </div>
+                <div class="col-md-6">
+                  <label for="telefono" class="form-label">Teléfono</label>
+                  <input type="text" class="form-control" id="telefono" required>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="direccion" class="form-label">Dirección de Envío</label>
+                <input type="text" class="form-control" id="direccion" required>
+              </div>
+
+              <div class="mb-3">
+                <label for="email" class="form-label">Correo Electrónico</label>
+                <input type="email" class="form-control" id="email" required>
+              </div>
+
+              <h5 class="mt-4">Forma de pago</h5>
+
+              <div class="mb-3">
+                <label for="tarjeta" class="form-label">Número de tarjeta</label>
+                <input type="text" class="form-control" id="tarjeta" required>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="fecha" class="form-label">Fecha de vencimiento</label>
+                  <input type="month" class="form-control" id="fecha" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="codigo" class="form-label">Código de seguridad</label>
+                  <input type="text" class="form-control" id="codigo" required>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-success w-100">🛒 Confirmar compra</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen lateral -->
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header bg-primary text-white">
+            Resumen de productos
+          </div>
+          <div class="card-body">
+            <ul id="resumenLista" class="list-group mb-3"></ul>
+            <h5 class="text-end">Total: $<span id="resumenTotal">0</span></h5>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-light text-center py-3 mt-5">
+    <p class="mb-0">© 2025 DIGI-LIBROS. Todos los derechos reservados.</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      mostrarResumenCarrito();
+      document.getElementById("formularioPago").addEventListener("submit", procesarPago);
+    });
+
+    function mostrarResumenCarrito() {
+      const carritoResumen = document.getElementById("carritoResumen");
+      const resumenProductos = document.getElementById("resumenLista");
+      const totalCarrito = document.getElementById("totalCarrito");
+      const resumenTotal = document.getElementById("resumenTotal");
+
+      carritoResumen.innerHTML = "";
+      resumenProductos.innerHTML = "";
+
+      let total = 0;
+
+      carrito.forEach(item => {
+        const li = document.createElement("li");
+        li.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
+        li.innerHTML = `${item.nombre} <span>$${item.precio}</span>`;
+        carritoResumen.appendChild(li);
+
+        const liResumen = document.createElement("li");
+        liResumen.classList.add("list-group-item", "d-flex", "justify-content-between");
+        liResumen.innerHTML = `${item.nombre} <span>$${item.precio}</span>`;
+        resumenProductos.appendChild(liResumen);
+
+        total += item.precio;
+      });
+
+      totalCarrito.textContent = total;
+      resumenTotal.textContent = total;
+    }
+
+    function procesarPago(event) {
+      event.preventDefault();
+
+      const campos = ["nombre", "direccion", "telefono", "email", "tarjeta", "fecha", "codigo"];
+      const validos = campos.every(id => document.getElementById(id).value.trim() !== "");
+
+      if (validos) {
+        alert("¡Compra realizada con éxito!");
+        carrito = [];
+        localStorage.setItem("carrito", JSON.stringify(carrito));
+        window.location.href = "/app/templates/base.html";
+      } else {
+        alert("Por favor, completa todos los campos.");
+      }
+    }
+  </script>
+</body>
+</html>

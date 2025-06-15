@@ -1,0 +1,149 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@1,300&display=swap');
+
+body{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+.envios{
+    font-family: 'Kaushan Script', cursive;
+    background-color:rgb(168, 130, 174);
+    color: pink;
+    height: 25px;
+    text-align: center;
+    margin:1px;
+}
+
+.navbar{
+    font-family: 'Kaushan Script', cursive;
+    background-color:rgb(237, 240, 243);
+    a{
+        font-size: 20px;
+        text-decoration: none;
+        color: rgb(158, 196, 209);
+        &:hover{
+            color: pink;
+        }
+    }
+}
+
+.titulo{
+    font-size: 25px;
+    text-align: center;
+    color: rgb(158, 196, 209);
+    text-shadow: 1px 2px 2px black;
+    font-family: 'Kaushan Script', cursive;
+    padding: 10px;
+    margin-top: 90px;
+    margin-bottom: 20px;
+}
+
+.jumbotron{
+    margin-top: 40px;
+    background-image: linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)), url(/fotos/flower-g581020547_1920.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    img{
+        width: 50%;
+    }
+}
+.productos{
+    h2{
+        text-align: center;
+        color: rgb(158, 196, 209);
+        font-family: 'Kaushan Script', cursive;
+        margin-top: 10px;
+        margin-bottom: 15px;
+    }
+    
+}
+
+.card{
+    img{
+        height: 350px;
+    }
+    h5{
+        color:black;
+        font-family: 'Kaushan Script', cursive;
+    }
+    p{
+        font-family: 'Kaushan Script', cursive;
+        font-size: 14px;
+    }
+    margin-bottom: 10px;
+    
+}
+
+footer{
+    background-color:rgb(168, 130, 174);
+    h6{
+        margin-top: 5px;
+        margin-left: 5px;
+        color: rgb(158, 196, 209);
+        font-family: 'Kaushan Script', cursive;
+    }
+    a{
+        font-family: 'Kaushan Script', cursive;
+        text-decoration: none;
+        color: pink;
+        font-size: 15px;
+        margin-right: 5px;
+        margin-left: 20px;
+        &:hover{
+            color: rgb(158, 196, 209);
+        }
+    }
+    i{
+        color: pink;
+    }
+    p{
+        padding-top: 12px;
+        margin-top: 1px;
+        color: pink;
+        text-align: center;
+        font-size: 8px;
+    }
+}
+
+.espacio{
+    margin-top: 100px;
+    margin-bottom: 100px;
+}
+
+.formulario{
+    margin-bottom: 5px;
+    margin-top: 90px;
+    color: rgb(158, 196, 209);
+    font-family: 'Kaushan Script', cursive;
+    background-color:rgb(168, 130, 174);
+
+    h5{
+        text-align: center;
+        font-size: 35px;
+        text-shadow: 1px 1px 3px black;
+    }
+    
+    label{
+        font-size: 20px;
+        color: pink;
+    }
+    input{
+        background-color:rgb(158, 196, 209);
+    }
+    textarea{
+        background-color:rgb(158, 196, 209);
+    }
+    button{
+        margin-bottom: 8px;
+        background-color:rgb(158, 196, 209);
+        color: rgb(0, 0, 0);
+        border-radius: 10px;
+        border: 3px solid pink;
+    }
+    
+    
+}

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <title>Libros Infantiles</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{{ url_for('tienda') }}">
+        <img src="{{ url_for('static', filename='fotos/logo.jpg') }}" alt="Logo" width="30" height="24" />
+        DIGI-LIBROS
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+ 
+           <li class="nav-item"><a class="nav-link" href="{{ url_for('registrar.registrar_index') }}">Registrar Libro</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('tienda') }}">Tienda</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Categorías
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" href="{{ url_for('infantil.infantilIndex') }}">Infantiles</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('novedad.novedadIndex') }}">Novedades</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('romance.romanceIndex') }}">Romance</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenido Infantil -->
+  <div class="container my-4">
+    <h1 class="text-center">Libros Infantiles</h1>
+    <h2 class="mb-4 text-center">Top semanal</h2>
+    <div class="row justify-content-center mb-4">
+  <div class="col-md-6">
+    <input type="text" id="busqueda" class="form-control" placeholder="Buscar libro por título...">
+    <div id="resultados" class="mt-3"></div>
+  </div>
+</div>
+
+    <div class="row justify-content-center">
+      {% if libros %}
+        {% for libro in libros %}
+          <div class="col-md-3 mb-4">
+            <div class="card h-100">
+              <a href="{{ url_for('infantil.infantilDetalle', id_libro=libro.id) }}">
+                <img src="{{ libro.imagen_url }}" class="card-img-top" alt="{{ libro.titulo }}" style="height: 250px; object-fit: cover;" />
+              </a>
+              <div class="card-body">
+                <h5 class="card-title">
+                  <a href="{{ url_for('infantil.infantilDetalle', id_libro=libro.id) }}" class="text-decoration-none text-dark">
+                    {{ libro.titulo }}
+                  </a>
+                </h5>
+                <p class="card-text">₲{{ "{:,.0f}".format(libro.precio|int).replace(",", ".") }}</p>
+                {% if libro.autor_nombre %}
+                  <p class="card-text"><small class="text-muted">Autor: {{ libro.autor_nombre }}</small></p>
+                {% endif %}
+                <a href="{{ url_for('infantil.infantilDetalle', id_libro=libro.id) }}" class="btn btn-outline-primary btn-sm">Ver detalle</a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <!-- Datos de ejemplo si no hay libros -->
+        {% set libros_ejemplo = [
+          {'id': 1, 'titulo': 'El Principito', 'precio': 50000, 'imagen_url': url_for('static', filename='fotos/principito.jpg'), 'autor_nombre': 'Antoine de Saint-Exupéry'},
+          {'id': 2, 'titulo': 'Cuentos de la Selva', 'precio': 45000, 'imagen_url': url_for('static', filename='fotos/cuentos_selva.jpg'), 'autor_nombre': 'Horacio Quiroga'},
+          {'id': 3, 'titulo': 'La Granja', 'precio': 30000, 'imagen_url': url_for('static', filename='fotos/la_granja.jpg'), 'autor_nombre': 'Anónimo'},
+          {'id': 4, 'titulo': 'Mi Primer Abecedario', 'precio': 35000, 'imagen_url': url_for('static', filename='fotos/abecedario.jpg'), 'autor_nombre': 'Editorial Educativa'}
+        ] %}
+        {% for libro in libros_ejemplo %}
+          <div class="col-md-3 mb-4">
+            <div class="card h-100">
+              <img src="{{ libro.imagen_url }}" class="card-img-top" alt="{{ libro.titulo }}" style="height: 250px; object-fit: cover;" />
+              <div class="card-body">
+                <h5 class="card-title">{{ libro.titulo }}</h5>
+                <p class="card-text">₲{{ "{:,.0f}".format(libro.precio).replace(",", ".") }}</p>
+                <p class="card-text"><small class="text-muted">Autor: {{ libro.autor_nombre }}</small></p>
+                <a href="#" class="btn btn-outline-primary btn-sm disabled" tabindex="-1" aria-disabled="true">Ver detalle</a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-light py-4 mt-4">
+    <div class="container text-center">
+      <small>UTIC</small>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function () {
+    $('#busqueda').on('input', function () {
+      let query = $(this).val();
+
+      if (query.length > 2) {
+        $.ajax({
+          url: '/infantil/buscar-libros', // Asegúrate que este URL coincide con tu blueprint
+          method: 'GET',
+          data: { q: query },
+          success: function (respuesta) {
+            mostrarResultados(respuesta);
+          },
+          error: function () {
+            $('#resultados').html('<p class="text-danger">Error al buscar.</p>');
+          }
+        });
+      } else {
+        $('#resultados').empty();
+      }
+    });
+
+    function mostrarResultados(libros) {
+      let html = '';
+
+      if (libros.length === 0) {
+        html = '<p class="text-muted">No se encontraron resultados.</p>';
+      } else {
+        libros.forEach(libro => {
+          html += `
+            <div class="card mb-2">
+              <div class="card-body">
+                <h5 class="card-title">${libro.titulo}</h5>
+                <p class="card-text">Autor: ${libro.autor}</p>
+                <a href="/infantil-detalle/${libro.id}" class="btn btn-primary btn-sm">Ver detalle</a>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      $('#resultados').html(html);
+    }
+  });
+</script>
+
+
+</html>

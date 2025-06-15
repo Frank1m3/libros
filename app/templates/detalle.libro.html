@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ libro.titulo }} - DIGI-LIBROS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{{ url_for('infantil.infantilIndex') }}">
+        <img src="{{ url_for('static', filename='fotos/logo.jpg') }}" alt="Logo" width="30" height="24" />
+        DIGI-LIBROS
+      </a>
+      <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('infantil.infantilIndex') }}">Infantiles</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('novedad.novedadIndex') }}">Novedades</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('romance.romanceIndex') }}">Romance</a></li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('infantil.carrito') }}" id="verCarrito">
+              <i class="fa-solid fa-cart-shopping"></i> Carrito (<span id="carritoCantidad">{{ carrito_cantidad }}</span>)
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Detalle del Libro -->
+  <div class="container my-5">
+    <div class="row">
+      <div class="col-md-5">
+        <img src="{{ url_for('static', filename='fotos/' + libro.imagen) }}" class="img-fluid rounded" alt="{{ libro.titulo }}" />
+      </div>
+      <div class="col-md-7">
+        <h2>{{ libro.titulo }}</h2>
+        <p class="text-muted">Autor: {{ libro.autor }}</p>
+        <p>{{ libro.descripcion }}</p>
+        <h4 class="text-success">₲{{ libro.precio }}</h4>
+        <form action="{{ url_for('infantil.agregar_al_carrito', id_libro=libro.id) }}" method="post">
+          <div class="mb-3">
+            <label for="cantidad" class="form-label">Cantidad</label>
+            <input type="number" class="form-control" id="cantidad" name="cantidad" min="0" value="1" />
+          </div>
+          <button type="submit" class="btn btn-primary mt-3">
+            <i class="fa-solid fa-cart-plus"></i> Agregar al carrito
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-light py-4 mt-4">
+    <div class="container text-center">
+      <small>Franco Mereles</small>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

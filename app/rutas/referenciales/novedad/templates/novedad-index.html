@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Libros de Novedades</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-blue bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="base.html">
+        <img src="/fotos/logo.jpg" alt="Logo" width="30" height="24" />
+        DIGI-LIBROS
+      </a>
+      <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="/contactos.html">Contactos</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('tienda') }}">Tienda</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" data-bs-toggle="dropdown">
+              Categorías
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{{ url_for('infantil.infantilIndex') }}">Infantiles</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('novedad.novedadIndex') }}">Novedades</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('romance.romanceIndex') }}">Romance</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" id="verCarrito">
+              <i class="fa-solid fa-cart-shopping"></i> Carrito (<span id="carritoCantidad">0</span>)
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenido -->
+  <div class="container my-4">
+    <h1 class="text-center">Categoría: Novedades</h1>
+    <div class="row justify-content-center">
+      <!-- Producto -->
+      <div class="col-xl-3 col-md-4 col-sm-6 mb-4" id="productos">
+        <!-- Se repite el mismo producto como ejemplo -->
+        <!-- Los productos se insertarán con JS si se desea automatizar -->
+        <!-- O podés modificar a mano con diferentes libros -->
+        <div class="card">
+          <img src="/fotos/antesdediciembre.jpg" class="card-img-top" alt="Antes de diciembre" />
+          <div class="card-body">
+            <h5 class="card-title">Antes de diciembre</h5>
+            <p class="card-text">Tres meses, dos vidas y una decisión.</p>
+            <p>Precio: ₲4000</p>
+            <a href="#" class="btn btn-primary" onclick="agregarAlCarrito(0)">Agregar al carrito</a>
+          </div>
+        </div>
+      </div>
+      <!-- Copia el bloque anterior si tenés más libros -->
+    </div>
+  </div>
+
+  <!-- Modal Carrito -->
+  <div class="modal fade" id="carritoModal" tabindex="-1" aria-labelledby="carritoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="carritoModalLabel">Tu carrito</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <ul id="carritoItems" class="list-group mb-3"></ul>
+          <h5 id="carritoTotal">Total: ₲0</h5>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-success" onclick="finalizarCompra()">Finalizar compra</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-light py-4 mt-4">
+    <div class="container text-center">
+      <small>UTIC-2025 FRANCO MERELES</small>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const productos = [
+      { nombre: "Antes de diciembre", precio: 4000 }
+      // Puedes agregar más productos aquí si lo deseas
+    ];
+
+    const carrito = [];
+
+    function agregarAlCarrito(index) {
+      const producto = productos[index];
+      const existente = carrito.find(item => item.nombre === producto.nombre);
+
+      if (existente) {
+        existente.cantidad += 1;
+      } else {
+        carrito.push({ ...producto, cantidad: 1 });
+      }
+
+      actualizarCarrito();
+    }
+
+    function actualizarCarrito() {
+      const lista = document.getElementById("carritoItems");
+      const total = document.getElementById("carritoTotal");
+      const cantidadSpan = document.getElementById("carritoCantidad");
+
+      lista.innerHTML = "";
+
+      let totalCarrito = 0;
+      let totalItems = 0;
+
+      carrito.forEach(item => {
+        const li = document.createElement("li");
+        li.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
+        li.innerHTML = `${item.nombre} x${item.cantidad} <span>₲${(item.precio * item.cantidad).toLocaleString()}</span>`;
+        lista.appendChild(li);
+
+        totalCarrito += item.precio * item.cantidad;
+        totalItems += item.cantidad;
+      });
+
+      total.textContent = `Total: ₲${totalCarrito.toLocaleString()}`;
+      cantidadSpan.textContent = totalItems;
+    }
+
+    document.getElementById("verCarrito").addEventListener("click", function (e) {
+      e.preventDefault();
+      const modal = new bootstrap.Modal(document.getElementById("carritoModal"));
+      modal.show();
+    });
+
+    function finalizarCompra() {
+      if (carrito.length === 0) {
+        alert("Tu carrito está vacío.");
+        return;
+      }
+
+      alert("¡Compra realizada con éxito!");
+      carrito.length = 0;
+      actualizarCarrito();
+
+      const modal = bootstrap.Modal.getInstance(document.getElementById("carritoModal"));
+      modal.hide();
+    }
+  </script>
+</body>
+</html>

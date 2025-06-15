@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Detalle del Libro de Romance</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{{ url_for('tienda') }}">
+        <img src="{{ url_for('static', filename='fotos/logo.jpg') }}" alt="Logo" width="30" height="24" />
+        DIGI-LIBROS
+      </a>
+      <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('tienda') }}">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('contactos') }}">Contactos</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" data-bs-toggle="dropdown">
+              Categorías
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{{ url_for('infantil.infantilIndex') }}">Infantiles</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('novedad.novedadIndex') }}">Novedades</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('romance.romanceIndex') }}">Romance</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('romance.carrito') }}">
+              <i class="fa-solid fa-cart-shopping"></i> Carrito (<span id="carritoCantidad">0</span>)
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Detalle del Libro de Romance -->
+  <div class="container my-5">
+    <div class="row">
+      <div class="col-md-5">
+        <img src="{{ url_for('static', filename='fotos/' + libro.imagen) }}" class="img-fluid rounded" alt="{{ libro.titulo }}" />
+      </div>
+      <div class="col-md-7">
+        <h2>{{ libro.titulo }}</h2>
+        <p class="text-muted">Autor: {{ libro.autor }}</p>
+        <p>{{ libro.descripcion }}</p>
+        <h4 class="text-success">₲{{ libro.precio }}</h4>
+
+        <!-- Selector de cantidad -->
+        <div class="input-group mb-3" style="width: 150px;">
+          <button class="btn btn-outline-secondary" type="button" onclick="cambiarCantidad(-1)">−</button>
+          <input type="number" id="cantidad" class="form-control text-center" value="1" min="1" />
+          <button class="btn btn-outline-secondary" type="button" onclick="cambiarCantidad(1)">+</button>
+        </div>
+
+        <!-- Botón de agregar al carrito -->
+        <button class="btn btn-success" onclick="agregarAlCarrito({{ libro.id }})">
+          <i class="fa-solid fa-cart-plus"></i> Agregar al carrito
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-light py-4 mt-4">
+    <div class="container text-center">
+      <small>Franco Mereles - UTIC 2025</small>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function cambiarCantidad(valor) {
+      const input = document.getElementById("cantidad");
+      let actual = parseInt(input.value);
+      if (isNaN(actual)) actual = 1;
+      actual = Math.max(1, actual + valor);
+      input.value = actual;
+    }
+
+    function agregarAlCarrito(id) {
+      const cantidad = document.getElementById("cantidad").value;
+      fetch(`/agregar_al_carrito/${id}?cantidad=${cantidad}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.total_items !== undefined) {
+            document.getElementById("carritoCantidad").textContent = data.total_items;
+          } else {
+            alert("No se pudo agregar al carrito.");
+          }
+        })
+        .catch(error => {
+          alert("Error al agregar al carrito: " + error);
+        });
+    }
+  </script>
+</body>
+</html>

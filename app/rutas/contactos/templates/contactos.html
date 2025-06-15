@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contacto</title>
+   <!-- para mis íconos -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-...hash..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="{{ url_for('static', filename='js/funciones.js') }}"></script>
+</head>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">
+      <img
+        src="/static/fotos/logo.jpg"
+        alt="Logo"
+        width="30"
+        height="24"
+        class="d-inline-block align-text-top"
+      />
+      DIGI-LIBROS
+    </a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('contactos.vista_contacto') }}">Contactos</a></li>
+
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('tienda') }}">Tienda</a></li>
+         <li class="nav-item"><a class="nav-link" href="{{ url_for('registrar.registrar_index') }}">Registrar Libro</a></li>
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="navbarDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Categorías
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li>
+              <a class="dropdown-item" href="{{ url_for('infantil.infantilIndex') }}"
+                >Infantiles</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ url_for('novedad.novedadIndex') }}"
+                >Novedades</a
+              >
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ url_for('romance.romanceIndex') }}"
+                >Romance</a
+              >
+            </li>
+          </ul>
+        </li>
+
+      </ul>
+
+
+      <!-- Usuario y logout (con margen a la izquierda para separarlo del formulario) -->
+      <ul class="navbar-nav ms-3">
+        {% if session.usuario_nombre %}
+          <li class="nav-item">
+            <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">
+              <i class="fa-solid fa-user"></i> {{ session.usuario_nombre }}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('login.logout') }}">
+              <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+            </a>
+          </li>
+        {% else %}
+         
+          
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+<body class="bg-gradient-white"style="background-image: url('{{ url_for('static', filename='img/utiqui.png') }}'); background-repeat: repeat; background-size: auto; height: 100vh;"></body>
+
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+
+        <div class="card shadow-sm border-0 rounded-4">
+  
+          <div class="card-body p-4 p-md-5">
+            <h2 class="card-title mb-4 text-center fw-bold text-primary">Contáctanos</h2>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+
+            <form method="post" novalidate>
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <div class="mb-3">
+                <label for="nombre" class="form-label fw-semibold">Nombre</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-primary text-white">
+                    <!-- User SVG icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
+                      <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                      <path d="M14 14s-1-1.5-6-1.5S2 14 2 14s1-4 6-4 6 4 6 4z"/>
+                    </svg>
+                  </span>
+                  <input type="text" class="form-control" name="nombre" id="nombre" placeholder="Ingrese su nombre" required />
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="apellido" class="form-label fw-semibold">Apellido</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-primary text-white">
+                    <!-- User SVG icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-badge" viewBox="0 0 16 16">
+                      <path d="M6.5 2a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1h-3z"/>
+                      <path d="M3 14s-1 0-1-1 1-4 6-4 6 4 6 4 0 1-1 1H3zm9-6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
+                    </svg>
+                  </span>
+                  <input type="text" class="form-control" name="apellido" id="apellido" placeholder="Ingrese su apellido" required />
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="correo" class="form-label fw-semibold">Correo</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-primary text-white">
+                    <!-- Envelope SVG icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16">
+                      <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1.243L8 9.777 0 5.243V4z"/>
+                      <path d="M0 6.383l5.803 3.67L0 13.433V6.383zM6.761 10.83l1.239.782 1.239-.782L16 6.383v7.05l-5.803-3.38L8 12.223l-2.197-1.17L0 13.433v-7.05l6.761 4.447z"/>
+                    </svg>
+                  </span>
+                  <input type="email" class="form-control" name="correo" id="correo" placeholder="ejemplo@correo.com" required />
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="telefono" class="form-label fw-semibold">Teléfono</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-primary text-white">
+                    <!-- Telephone SVG icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-telephone" viewBox="0 0 16 16">
+                      <path d="M3.654 1.328a.678.678 0 0 1 .781-.28l2.44 1.09a.678.678 0 0 1 .384.57l.013.177a.678.678 0 0 1-.196.466L5.16 4.3a11.54 11.54 0 0 0 5.42 5.42l1.378-1.815a.678.678 0 0 1 .466-.196l.177.013a.678.678 0 0 1 .57.384l1.09 2.44a.678.678 0 0 1-.28.781l-2.457 1.83a.678.678 0 0 1-.643.086c-1.14-.457-2.642-1.3-4.511-3.17-1.87-1.87-2.713-3.37-3.17-4.51a.678.678 0 0 1 .085-.644L3.654 1.329z"/>
+                    </svg>
+                  </span>
+                  <input type="tel" class="form-control" name="telefono" id="telefono" placeholder="Número telefónico (opcional)" />
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label for="mensaje" class="form-label fw-semibold">Mensaje</label>
+                <textarea class="form-control" name="mensaje" id="mensaje" rows="5" placeholder="Escriba su mensaje aquí..." required></textarea>
+              </div>
+
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg shadow-sm">Enviar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+    <!-- PIECITO -->
+  <footer class="bg-light py-4 mt-4">
+  <div class="container">
+    <div class="row">
+      <div class="col-xl-4">
+        <h2>Otros medios de contacto</h2>
+        <p>
+  <a href="https://www.facebook.com/utic.edu/?locale=es_LA" target="_blank" class="text-decoration-none">
+    <i class="fa-brands fa-facebook"></i> Facebook
+  </a>
+</p>
+ <a href="https://www.instagram.com/frank1_m3" target="_blank" rel="noopener noreferrer">
+  <i class="fa-brands fa-instagram"></i> INSTAGRAM
+</a>
+ </p>
+  <a href="mailto:francomereles24@gmail.com" class="text-decoration-none">
+    <i class="fa-solid fa-envelope"></i> GMAIL
+  </a>
+</p>
+
+  <a href="https://wa.me/595992752919" target="_blank" rel="noopener noreferrer">
+ <i class="fa-brands fa-whatsapp"></i> WHATSAPP
+  </a>
+</p>
+      </div>
+      <div class="col-12 text-center mt-3">
+        <small>
+          DIGI-LIBROS
+        </small>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  <!-- Bootstrap JS Bundle CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/static/js/funciones.js"></script>
+<script src="{{ url_for('static', filename='js/funciones.js') }}"></script>
+</body>
+
+</html>

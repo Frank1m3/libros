@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Libros de Romance</title>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"
+  />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="base.html">
+        <img src="/fotos/logo.jpg" alt="Logo" width="30" height="24" />
+        DIGI-LIBROS
+      </a>
+      <button
+        class="navbar-toggler"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="/contactos.html">Contactos</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('tienda') }}">Tienda</a></li>
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              id="navbarDropdown"
+              data-bs-toggle="dropdown"
+            >
+              Categorías
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="{{ url_for('infantil.infantilIndex') }}"
+                  >Infantiles</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="{{ url_for('novedad.novedadIndex') }}"
+                  >Novedades</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="{{ url_for('romance.romanceIndex') }}"
+                  >Romance</a
+                >
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" id="verCarrito">
+              <i class="fa-solid fa-cart-shopping"></i> Carrito
+              (<span id="carritoCantidad">0</span>)
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenido Romance -->
+  <div class="container my-4">
+    <h1 class="text-center">Categoría: Romance</h1>
+    <div class="row justify-content-center">
+      <!-- Card 1 -->
+      <div class="col-xl-3 col-md-4 col-sm-6 mb-4">
+        <div class="card">
+          <img
+            src="/fotos/antesdediciembre.jpg"
+            class="card-img-top"
+            alt="Antes de diciembre"
+          />
+          <div class="card-body">
+            <h5 class="card-title">Antes de diciembre</h5>
+            <p class="card-text">Tres meses, dos vidas y una decisión.</p>
+            <p>Precio: $4000</p>
+            <a
+              href="/romance-detalle/1"
+              class="btn btn-primary"
+              >Ver detalle</a
+            >
+          </div>
+        </div>
+      </div>
+      <!-- Card 2 -->
+      <div class="col-xl-3 col-md-4 col-sm-6 mb-4">
+        <div class="card">
+          <img
+            src="/fotos/hipotesis.jpg"
+            class="card-img-top"
+            alt="La hipótesis del amor"
+          />
+          <div class="card-body">
+            <h5 class="card-title">La hipótesis del amor</h5>
+            <p class="card-text">La irresistible fuerza de la atracción</p>
+            <p>Precio: $5300</p>
+            <a
+              href="/romance-detalle/2"
+              class="btn btn-primary"
+              >Ver detalle</a
+            >
+          </div>
+        </div>
+      </div>
+      <!-- Más libros acá si querés -->
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-light py-4 mt-4">
+    <div class="container text-center">
+      <small>Franco Mereles</small>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
