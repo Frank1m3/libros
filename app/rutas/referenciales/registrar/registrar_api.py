@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, Response, url_for, abort
 from app.dao.referenciales.registrar.RegistrarDao import RegistrarDao
 
-
 registrarapi = Blueprint('registrarapi', __name__, template_folder='templates')
 
 @registrarapi.route('/registrar')
