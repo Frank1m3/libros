@@ -1,60 +1,123 @@
 from flask import current_app as app
 from app.conexion.Conexion import Conexion
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 class RomanceDao:
-    def get_por_id(self, id_libro):
+    CATEGORIA_ID = 1  # ID correspondiente a la categoría Romance
+
+    def get_todos(self):
+        """
+        Devuelve una lista de libros de romance con todos los datos relacionados.
+        """
         sql = """
-            SELECT id_libro, titulo, descripcion, precio, imagen, autor
-            FROM libros_romance
-            WHERE id_libro = %s
+            SELECT 
+                l.id, l.titulo, l.descripcion, l.isbn, l.precio, l.stock, l.paginas,
+                a.nombre AS autor,
+                e.nombre AS editorial,
+                i.nombre AS idioma,
+                m.ancho, m.alto, m.profundidad,
+                ed.numero AS edicion,
+                t.numero AS tomo,
+                t.descripcion AS descripcion_tomo
+            FROM libros l
+            LEFT JOIN autores a ON l.autor_id = a.id
+            LEFT JOIN editoriales e ON l.editorial_id = e.id
+            LEFT JOIN idiomas i ON l.idioma_id = i.id
+            LEFT JOIN medidas m ON l.medida_id = m.id
+            LEFT JOIN ediciones ed ON l.edicion_id = ed.id
+            LEFT JOIN tomos t ON l.tomo_id = t.id
+            WHERE l.categoria_id = %s
+            ORDER BY l.titulo
         """
         conexion = Conexion()
         con = conexion.getConexion()
-        cur = con.cursor()
+        cur = con.cursor(cursor_factory=RealDictCursor)
         try:
-            cur.execute(sql, (id_libro,))
-            l = cur.fetchone()
-            if l:
-                return {
-                    "id": l[0],
-                    "titulo": l[1],
-                    "descripcion": l[2],
-                    "precio": float(l[3]),
-                    "imagen": l[4],
-                    "autor": l[5]
-                }
-            return None
+            cur.execute(sql, (self.CATEGORIA_ID,))
+            return cur.fetchall()
         except Exception as e:
-            print(f"Error al obtener libro romance por ID: {e}")
+            app.logger.error(f"[RomanceDao.get_todos] Error: {e}")
+            return []
+        finally:
+            cur.close()
+            con.close()
+
+    def get_por_id(self, id_libro):
+        """
+        Devuelve un libro de romance específico por ID con todos sus datos relacionados.
+        """
+        sql = """
+            SELECT 
+                l.id, l.titulo, l.descripcion, l.isbn, l.precio, l.stock, l.paginas,
+                a.nombre AS autor,
+                e.nombre AS editorial,
+                i.nombre AS idioma,
+                m.ancho, m.alto, m.profundidad,
+                ed.numero AS edicion,
+                t.numero AS tomo,
+                t.descripcion AS descripcion_tomo
+            FROM libros l
+            LEFT JOIN autores a ON l.autor_id = a.id
+            LEFT JOIN editoriales e ON l.editorial_id = e.id
+            LEFT JOIN idiomas i ON l.idioma_id = i.id
+            LEFT JOIN medidas m ON l.medida_id = m.id
+            LEFT JOIN ediciones ed ON l.edicion_id = ed.id
+            LEFT JOIN tomos t ON l.tomo_id = t.id
+            WHERE l.id = %s AND l.categoria_id = %s
+        """
+        conexion = Conexion()
+        con = conexion.getConexion()
+        cur = con.cursor(cursor_factory=RealDictCursor)
+        try:
+            cur.execute(sql, (id_libro, self.CATEGORIA_ID))
+            return cur.fetchone()
+        except Exception as e:
+            app.logger.error(f"[RomanceDao.get_por_id] Error: {e}")
             return None
         finally:
             cur.close()
             con.close()
 
-    def getTodos(self):
-        sql = """
-            SELECT id_libro, titulo, descripcion, precio, imagen, autor
-            FROM libros_romance
+    def obtener_imagen(self, id_libro):
         """
+        Devuelve la imagen binaria del libro de romance.
+        """
+        sql = "SELECT id, imagen FROM libros WHERE id = %s AND categoria_id = %s"
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(sql)
-            rows = cur.fetchall()
-            libros = []
-            for l in rows:
-                libros.append({
-                    "id": l[0],
-                    "titulo": l[1],
-                    "descripcion": l[2],
-                    "precio": float(l[3]),
-                    "imagen": l[4],
-                    "autor": l[5]
-                })
-            return libros
+            cur.execute(sql, (id_libro, self.CATEGORIA_ID))
+            return cur.fetchone()
         except Exception as e:
-            print(f"Error al obtener todos los libros romance: {e}")
+            app.logger.error(f"[RomanceDao.obtener_imagen] Error: {e}")
+            return None
+        finally:
+            cur.close()
+            con.close()
+
+    def buscar_por_titulo(self, texto):
+        """
+        Devuelve libros de romance cuyo título coincide parcialmente con el texto dado.
+        """
+        sql = """
+            SELECT 
+                l.id, l.titulo, a.nombre AS autor
+            FROM libros l
+            LEFT JOIN autores a ON l.autor_id = a.id
+            WHERE l.categoria_id = %s AND LOWER(l.titulo) LIKE %s
+            ORDER BY l.titulo
+            LIMIT 10
+        """
+        conexion = Conexion()
+        con = conexion.getConexion()
+        cur = con.cursor(cursor_factory=RealDictCursor)
+        try:
+            cur.execute(sql, (self.CATEGORIA_ID, f"%{texto.lower()}%"))
+            return cur.fetchall()
+        except Exception as e:
+            app.logger.error(f"[RomanceDao.buscar_por_titulo] Error: {e}")
             return []
         finally:
             cur.close()

@@ -18,8 +18,39 @@
   </style>
 </head>
 <body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{{ url_for('tienda') }}">
+        <img src="{{ url_for('static', filename='fotos/logo.jpg') }}" alt="Logo" width="30" height="24" />
+        DIGI-LIBROS
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>      
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav"> 
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('tienda') }}">Tienda</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Categorías
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" href="{{ url_for('infantil.infantilIndex') }}">Infantiles</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('novedad.novedadIndex') }}">Novedades</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('romance.romanceIndex') }}">Romance</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
   <div class="container py-4">
-    <h1 class="mb-4 text-center">Registrar Libro</h1>
+   <div class="bg-primary text-white rounded p-3 mb-4 text-center shadow">
+  <h1 class="m-0">REGISTRAR LIBROS</h1>
+</div>
+
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -34,120 +65,125 @@
       {% endif %}
     {% endwith %}
 
-    <form method="POST" enctype="multipart/form-data" class="row g-3">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <!-- FORMULARIO EN TARJETA -->
+    <div class="card shadow-sm mb-5">
+      <div class="card-body">
+        <form method="POST" enctype="multipart/form-data" class="row g-3">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-      <div class="col-md-6">
-        <label for="titulo" class="form-label">Título <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="titulo" name="titulo" placeholder="Título del libro" required />
-      </div>
+          <div class="col-md-6">
+            <label for="titulo" class="form-label">Título <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="titulo" name="titulo" placeholder="Título del libro" required />
+          </div>
 
-      <div class="col-md-6">
-        <label for="autor_id" class="form-label">Autor <span class="text-danger">*</span></label>
-        <select class="form-select" id="autor_id" name="autor_id" required>
-          <option value="" selected>Seleccione autor</option>
-          {% for autor in autores %}
-          <option value="{{ autor.id }}">{{ autor.nombre }}</option>
-          {% endfor %}
-        </select>
-      </div>
+          <div class="col-md-6">
+            <label for="autor_id" class="form-label">Autor <span class="text-danger">*</span></label>
+            <select class="form-select" id="autor_id" name="autor_id" required>
+              <option value="" selected>Seleccione autor</option>
+              {% for autor in autores %}
+              <option value="{{ autor.id }}">{{ autor.nombre }}</option>
+              {% endfor %}
+            </select>
+          </div>
 
-      <div class="col-12">
-        <label for="descripcion" class="form-label">Descripción</label>
-        <textarea class="form-control" id="descripcion" name="descripcion" rows="3" placeholder="Descripción del libro"></textarea>
-      </div>
+          <div class="col-12">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <textarea class="form-control" id="descripcion" name="descripcion" rows="3" placeholder="Descripción del libro"></textarea>
+          </div>
 
-      <div class="col-md-4">
-        <label for="isbn" class="form-label">ISBN</label>
-        <input type="text" class="form-control" id="isbn" name="isbn" placeholder="ISBN" />
-      </div>
+          <div class="col-md-4">
+            <label for="isbn" class="form-label">ISBN</label>
+            <input type="text" class="form-control" id="isbn" name="isbn" placeholder="ISBN" />
+          </div>
 
-      <div class="col-md-4">
-        <label for="precio" class="form-label">Precio</label>
-        <input type="number" step="0.01" class="form-control" id="precio" name="precio" placeholder="Precio" />
-      </div>
+          <div class="col-md-4">
+            <label for="precio" class="form-label">Precio</label>
+            <input type="number" step="0.01" class="form-control" id="precio" name="precio" placeholder="Precio" />
+          </div>
 
-      <div class="col-md-4">
-        <label for="stock" class="form-label">Stock</label>
-        <input type="number" class="form-control" id="stock" name="stock" placeholder="Stock" />
-      </div>
+          <div class="col-md-4">
+            <label for="stock" class="form-label">Stock</label>
+            <input type="number" class="form-control" id="stock" name="stock" placeholder="Stock" />
+          </div>
 
-      <div class="col-md-4">
-        <label for="paginas" class="form-label">Páginas <span class="text-danger">*</span></label>
-        <input type="number" class="form-control" id="paginas" name="paginas" placeholder="Número de páginas" required />
-      </div>
+          <div class="col-md-4">
+            <label for="paginas" class="form-label">Páginas <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" id="paginas" name="paginas" placeholder="Número de páginas" required />
+          </div>
 
-      <div class="col-md-4">
-        <label for="categoria_id" class="form-label">Categoría <span class="text-danger">*</span></label>
-        <select class="form-select" id="categoria_id" name="categoria_id" required>
-          <option value="" selected>Seleccione categoría</option>
-          {% for cat in categorias %}
-          <option value="{{ cat.id }}">{{ cat.nombre }}</option>
-          {% endfor %}
-        </select>
-      </div>
+          <div class="col-md-4">
+            <label for="categoria_id" class="form-label">Categoría <span class="text-danger">*</span></label>
+            <select class="form-select" id="categoria_id" name="categoria_id" required>
+              <option value="" selected>Seleccione categoría</option>
+              {% for cat in categorias %}
+              <option value="{{ cat.id }}">{{ cat.nombre }}</option>
+              {% endfor %}
+            </select>
+          </div>
 
-      <div class="col-md-4">
-        <label for="editorial_id" class="form-label">Editorial <span class="text-danger">*</span></label>
-        <select class="form-select" id="editorial_id" name="editorial_id" required>
-          <option value="" selected>Seleccione editorial</option>
-          {% for ed in editoriales %}
-          <option value="{{ ed.id }}">{{ ed.nombre }}</option>
-          {% endfor %}
-        </select>
-      </div>
+          <div class="col-md-4">
+            <label for="editorial_id" class="form-label">Editorial <span class="text-danger">*</span></label>
+            <select class="form-select" id="editorial_id" name="editorial_id" required>
+              <option value="" selected>Seleccione editorial</option>
+              {% for ed in editoriales %}
+              <option value="{{ ed.id }}">{{ ed.nombre }}</option>
+              {% endfor %}
+            </select>
+          </div>
 
-      <div class="col-md-4">
-        <label for="idioma_id" class="form-label">Idioma <span class="text-danger">*</span></label>
-        <select class="form-select" id="idioma_id" name="idioma_id" required>
-          <option value="" selected>Seleccione idioma</option>
-          {% for idioma in idiomas %}
-          <option value="{{ idioma.id }}">{{ idioma.nombre }}</option>
-          {% endfor %}
-        </select>
-      </div>
+          <div class="col-md-4">
+            <label for="idioma_id" class="form-label">Idioma <span class="text-danger">*</span></label>
+            <select class="form-select" id="idioma_id" name="idioma_id" required>
+              <option value="" selected>Seleccione idioma</option>
+              {% for idioma in idiomas %}
+              <option value="{{ idioma.id }}">{{ idioma.nombre }}</option>
+              {% endfor %}
+            </select>
+          </div>
 
-      <div class="col-md-4">
-        <label for="medida_id" class="form-label">Medida <span class="text-danger">*</span></label>
-        <select class="form-select" id="medida_id" name="medida_id" required>
-          <option value="" selected>Seleccione medida</option>
-          {% for m in medidas %}
-          <option value="{{ m.id }}">{{ m.ancho }}x{{ m.alto }}x{{ m.profundidad }}</option>
-          {% endfor %}
-        </select>
-      </div>
+          <div class="col-md-4">
+            <label for="medida_id" class="form-label">Medida <span class="text-danger">*</span></label>
+            <select class="form-select" id="medida_id" name="medida_id" required>
+              <option value="" selected>Seleccione medida</option>
+              {% for m in medidas %}
+              <option value="{{ m.id }}">{{ m.ancho }}x{{ m.alto }}x{{ m.profundidad }}</option>
+              {% endfor %}
+            </select>
+          </div>
 
-      <div class="col-md-4">
-        <label for="edicion_id" class="form-label">Edición <span class="text-danger">*</span></label>
-        <select class="form-select" id="edicion_id" name="edicion_id" required>
-          <option value="" selected>Seleccione edición</option>
-          {% for e in ediciones %}
-          <option value="{{ e.id }}">{{ e.numero }}</option>
-          {% endfor %}
-        </select>
-      </div>
+          <div class="col-md-4">
+            <label for="edicion_id" class="form-label">Edición <span class="text-danger">*</span></label>
+            <select class="form-select" id="edicion_id" name="edicion_id" required>
+              <option value="" selected>Seleccione edición</option>
+              {% for e in ediciones %}
+              <option value="{{ e.id }}">{{ e.numero }}</option>
+              {% endfor %}
+            </select>
+          </div>
 
-      <div class="col-md-4">
-        <label for="tomo_id" class="form-label">Tomo <span class="text-danger">*</span></label>
-        <select class="form-select" id="tomo_id" name="tomo_id" required>
-          <option value="" selected>Seleccione tomo</option>
-          {% for t in tomos %}
-          <option value="{{ t.id }}">{{ t.numero }} - {{ t.descripcion }}</option>
-          {% endfor %}
-        </select>
-      </div>
+          <div class="col-md-4">
+            <label for="tomo_id" class="form-label">Tomo <span class="text-danger">*</span></label>
+            <select class="form-select" id="tomo_id" name="tomo_id" required>
+              <option value="" selected>Seleccione tomo</option>
+              {% for t in tomos %}
+              <option value="{{ t.id }}">{{ t.numero }} - {{ t.descripcion }}</option>
+              {% endfor %}
+            </select>
+          </div>
 
-      <div class="col-12">
-        <label for="imagen" class="form-label">Imagen</label>
-        <input class="form-control" type="file" id="imagen" name="imagen" accept="image/*" />
-      </div>
+          <div class="col-12">
+            <label for="imagen" class="form-label">Imagen</label>
+            <input class="form-control" type="file" id="imagen" name="imagen" accept="image/*" />
+          </div>
 
-      <div class="col-12 text-center">
-        <button type="submit" class="btn btn-primary px-5">
-          <i class="fas fa-save me-2"></i> Guardar
-        </button>
+          <div class="col-12 text-center">
+            <button type="submit" class="btn btn-primary px-5">
+              <i class="fas fa-save me-2"></i> Guardar
+            </button>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
 
     <hr class="my-5" />
 

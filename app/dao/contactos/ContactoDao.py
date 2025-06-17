@@ -13,14 +13,13 @@ class ContactoDao:
         """
         conexion = Conexion()
         con = conexion.getConexion()
-        cur = con.cursor()
         try:
-            cur.execute(sql, (nombre, apellido, correo, telefono, mensaje))
+            with con.cursor() as cur:
+                cur.execute(sql, (nombre, apellido, correo, telefono, mensaje))
             con.commit()
             return True
         except Exception as e:
             app.logger.error(f"[ContactoDao.insertar] Error: {e}")
             return False
         finally:
-            cur.close()
             con.close()
