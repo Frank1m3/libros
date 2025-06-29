@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Tomos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Token CSRF para JS -->
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+</head>
+<body>
+
+<div class="container mt-4">
+  <h3>Gestión de Tomos</h3>
+
+  <div class="card">
+    <div class="card-header">
+      <button type="button" class="btn btn-primary" id="btnAgregar">Agregar</button>
+    </div>
+    <div class="card-body">
+      <table class="table table-striped" id="tbl">
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Descripción</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="modalFormulario" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle">Agregar Tomo</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+
+        <div class="modal-body">
+          <input type="hidden" id="txtIdTomo">
+          <div class="mb-3">
+            <label for="txtNumero" class="form-label">Número</label>
+            <input type="number" class="form-control" id="txtNumero" placeholder="Ingrese el número">
+          </div>
+          <div class="mb-3">
+            <label for="txtDescripcion" class="form-label">Descripción</label>
+            <textarea class="form-control" id="txtDescripcion" placeholder="Ingrese una descripción" rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="btnGuardar">Guardar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // Función para obtener el token CSRF desde la meta tag
+  function getCSRFToken() {
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  }
+
+  // Inicialización del DataTable
+  const tablaTomos = $('#tbl').DataTable({
+    ajax: {
+      url: '/api/v1/tomos',
+      dataSrc: 'data'
+    },
+    columns: [
+      { data: 'numero' },
+      { data: 'descripcion' },
+      {
+        data: function (row) {
+          return `
+            <button class="btn btn-primary btn-editar" data-id="${row.id}">Editar</button>
+            <button class="btn btn-danger btn-eliminar" data-id="${row.id}">Eliminar</button>
+          `;
+        }
+      }
+    ],
+    language: {
+      url: '/static/vendor/datatables/es-ES.json'
+    }
+  });
+
+  const modal = new bootstrap.Modal(document.getElementById('modalFormulario'));
+
+  // Evento para mostrar modal de agregar
+  $('#btnAgregar').on('click', () => {
+    $('#modalTitle').text('Agregar Tomo');
+    $('#txtIdTomo').val('');
+    $('#txtNumero').val('');
+    $('#txtDescripcion').val('');
+    modal.show();
+  });
+
+  // Evento para guardar (POST o PUT)
+  $('#btnGuardar').on('click', () => {
+    const id = $('#txtIdTomo').val();
+    const numero = $('#txtNumero').val();
+    const descripcion = $('#txtDescripcion').val().trim();
+
+    if (!numero) {
+      Swal.fire('Error', 'El campo número es obligatorio.', 'warning');
+      return;
+    }
+
+    const url = id ? `/api/v1/tomos/${id}` : '/api/v1/tomos';
+    const method = id ? 'PUT' : 'POST';
+
+    fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken()
+      },
+      body: JSON.stringify({ numero, descripcion })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        tablaTomos.ajax.reload();
+        modal.hide();
+        Swal.fire('Éxito', id ? 'Tomo actualizado' : 'Tomo agregado', 'success');
+      } else {
+        Swal.fire('Error', data.error || 'Error desconocido', 'error');
+      }
+    });
+  });
+
+  // Evento para cargar datos y mostrar modal de edición
+  $('#tbl').on('click', '.btn-editar', function () {
+    const id = $(this).data('id');
+    fetch(`/api/v1/tomos/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          $('#modalTitle').text('Editar Tomo');
+          $('#txtIdTomo').val(data.data.id);
+          $('#txtNumero').val(data.data.numero);
+          $('#txtDescripcion').val(data.data.descripcion);
+          modal.show();
+        } else {
+          Swal.fire('Error', data.error || 'No se pudo obtener el tomo', 'error');
+        }
+      });
+  });
+
+  // Evento para eliminar tomo
+  $('#tbl').on('click', '.btn-eliminar', function () {
+    const id = $(this).data('id');
+    Swal.fire({
+      title: '¿Eliminar tomo?',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
+      if (result.isConfirmed) {
+        fetch(`/api/v1/tomos/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRFToken': getCSRFToken()
+          }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            tablaTomos.ajax.reload();
+            Swal.fire('Eliminado', 'Tomo eliminado correctamente', 'success');
+          } else {
+            Swal.fire('Error', data.error || 'No se pudo eliminar', 'error');
+          }
+        });
+      }
+    });
+  });
+</script>
+</body>
+</html>

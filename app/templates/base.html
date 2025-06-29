@@ -50,6 +50,7 @@
 
         <li class="nav-item"><a class="nav-link" href="{{ url_for('tienda') }}">Tienda</a></li>
        <li class="nav-item">
+        
   <a class="nav-link" href="{{ url_for('registrar.registrar_index') }}">Registrar Libro</a>
 </li>
 
@@ -78,6 +79,35 @@
             <li>
               <a class="dropdown-item" href="{{ url_for('romance.romanceIndex') }}"
                 >Romance</a
+              >
+            </li>
+          </ul>
+        </li>
+        
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="navbarDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Referenciales
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li>
+              <a class="dropdown-item" href="{{ url_for('autor.autorIndex') }}"
+                >Autor</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ url_for('editorial.editorialIndex') }}"
+                >Editoriales</a
+              >
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ url_for('tomo.tomoIndex') }}"
+                >Tomo</a
               >
             </li>
           </ul>
