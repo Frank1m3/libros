@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gestión de Medidas</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">
+        <img src="/static/fotos/logo.jpg" alt="Logo" width="30" height="24" class="d-inline-block align-text-top" />
+        DIGI-LIBROS
+      </a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('contactos.vista_contacto') }}">Contactos</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('tienda') }}">Tienda</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('registrar.registrar_index') }}">Registrar Libro</a></li>
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              id="navbarDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              Categorías
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" href="{{ url_for('infantil.infantilIndex') }}">Infantiles</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('novedad.novedadIndex') }}">Novedades</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('romance.romanceIndex') }}">Romance</a></li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              id="navbarDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              Referenciales
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" href="{{ url_for('autor.autorIndex') }}">Autor</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('editorial.editorialIndex') }}">Editoriales</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('tomo.tomoIndex') }}">Tomo</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" id="verCarrito">
+              <i class="fa-solid fa-cart-shopping"></i> Carrito (<span id="carritoCantidad">0</span>)
+            </a>
+          </li>
+        </ul>
+        <form class="d-flex ms-auto" id="formBuscar" onsubmit="buscarLibros(event)">
+          <input class="form-control me-2" type="search" placeholder="Buscar libros..." name="query" id="inputBuscar" />
+          <button class="btn btn-outline-success" type="submit">Buscar</button>
+        </form>
+        <div id="resultadosBusqueda" class="mt-4"></div>
+        <ul class="navbar-nav ms-3">
+          {% if session.usuario_nombre %}
+          <li class="nav-item">
+            <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">
+              <i class="fa-solid fa-user"></i> {{ session.usuario_nombre }}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('login.logout') }}">
+              <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+            </a>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('login.login') }}">
+              <i class="fa-solid fa-right-to-bracket"></i> Iniciar sesión
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <meta name="csrf-token" content="{{ csrf_token() }}" />
+</head>
+<body>
+  <div class="container mt-4">
+    <h3>Gestión de Medidas</h3>
+    <div class="card">
+      <div class="card-header">
+        <button type="button" class="btn btn-primary" id="btnAgregar">Agregar</button>
+      </div>
+      <div class="card-body">
+        <table class="table table-striped" id="tblMedidas">
+          <thead>
+            <tr>
+              <th>Alto (cm)</th>
+              <th>Ancho (cm)</th>
+              <th>Profundidad (cm)</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="modalFormulario" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalTitle">Agregar Medida</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="txtIdMedida" />
+            <div class="mb-3">
+              <label for="txtAlto" class="form-label">Alto (cm)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                class="form-control"
+                id="txtAlto"
+                placeholder="Ingrese alto"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="txtAncho" class="form-label">Ancho (cm)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                class="form-control"
+                id="txtAncho"
+                placeholder="Ingrese ancho"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="txtProfundidad" class="form-label">Profundidad (cm)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                class="form-control"
+                id="txtProfundidad"
+                placeholder="Ingrese profundidad"
+              />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="btnGuardar">Guardar</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- JS -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function getCSRFToken() {
+      return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    }
+    const tablaMedidas = $('#tblMedidas').DataTable({
+      ajax: {
+        url: '/api/v1/medidas',
+        dataSrc: 'data'
+      },
+      columns: [
+        { data: 'alto' },
+        { data: 'ancho' },
+        { data: 'profundidad' },
+        {
+          data: function (row) {
+            return `
+              <button class="btn btn-sm btn-primary btn-editar" data-id="${row.id}">Editar</button>
+              <button class="btn btn-sm btn-danger btn-eliminar" data-id="${row.id}">Eliminar</button>
+            `;
+          },
+          orderable: false
+        }
+      ],
+      language: {
+        url: '/static/vendor/datatables/es-ES.json'
+      }
+    });
+    const modal = new bootstrap.Modal(document.getElementById('modalFormulario'));
+    $('#btnAgregar').on('click', () => {
+      $('#modalTitle').text('Agregar Medida');
+      $('#txtIdMedida').val('');
+      $('#txtAlto').val('');
+      $('#txtAncho').val('');
+      $('#txtProfundidad').val('');
+      modal.show();
+    });
+    $('#btnGuardar').on('click', () => {
+      const id = $('#txtIdMedida').val();
+      const alto = $('#txtAlto').val().trim();
+      const ancho = $('#txtAncho').val().trim();
+      const profundidad = $('#txtProfundidad').val().trim();
+      const url = id ? `/api/v1/medidas/${id}` : '/api/v1/medidas';
+      const method = id ? 'PUT' : 'POST';
+      fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({
+          alto: alto ? parseFloat(alto) : null,
+          ancho: ancho ? parseFloat(ancho) : null,
+          profundidad: profundidad ? parseFloat(profundidad) : null
+        })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            tablaMedidas.ajax.reload(null, false);
+            modal.hide();
+            Swal.fire('Éxito', id ? 'Medida actualizada' : 'Medida agregada', 'success');
+          } else {
+            Swal.fire('Error', data.error || 'Error desconocido', 'error');
+          }
+        })
+        .catch(() => Swal.fire('Error', 'Error de red o del servidor.', 'error'));
+    });
+    $('#tblMedidas').on('click', '.btn-editar', function () {
+      const id = $(this).data('id');
+      fetch(`/api/v1/medidas/${id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            $('#modalTitle').text('Editar Medida');
+            $('#txtIdMedida').val(data.data.id);
+            $('#txtAlto').val(data.data.alto);
+            $('#txtAncho').val(data.data.ancho);
+            $('#txtProfundidad').val(data.data.profundidad);
+            modal.show();
+          } else {
+            Swal.fire('Error', data.error || 'No se pudo cargar la medida', 'error');
+          }
+        })
+        .catch(() => Swal.fire('Error', 'Error de red o del servidor.', 'error'));
+    });
+    $('#tblMedidas').on('click', '.btn-eliminar', function () {
+      const id = $(this).data('id');
+      Swal.fire({
+        title: '¿Está seguro?',
+        text: 'No podrá revertir esta acción',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      }).then(result => {
+        if (result.isConfirmed) {
+          fetch(`/api/v1/medidas/${id}`, {
+            method: 'DELETE',
+            headers: { 'X-CSRFToken': getCSRFToken() }
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                tablaMedidas.ajax.reload(null, false);
+                Swal.fire('Eliminado', 'Medida eliminada correctamente', 'success');
+              } else {
+                Swal.fire('Error', data.error || 'No se pudo eliminar', 'error');
+              }
+            })
+            .catch(() => Swal.fire('Error', 'Error de red o del servidor.', 'error'));
+        }
+      });
+    });
+  </script>
+</body>
+</html>

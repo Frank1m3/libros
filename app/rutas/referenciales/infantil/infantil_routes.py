@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, render_template, redirect, url_for, Response, abort,request,jsonify
+from flask import Blueprint, render_template, redirect, url_for, Response, abort, request, jsonify
 from app.dao.referenciales.infantiles.InfantilDao import InfantilDao
 
 # Crear blueprint, sin indicar template_folder para usar la carpeta global "templates"
@@ -48,11 +48,20 @@ def obtener_imagen(id_libro):
 def contactos():
     return render_template('contactos.html')
 
-
+# --- Agregado: Ruta para búsqueda AJAX de libros por título ---
 @infmod.route('/buscar-libros')
 def buscar_libros():
-    q = request.args.get('q', '').lower()
+    q = request.args.get('q', '').strip().lower()
     dao = InfantilDao()
-    resultados = dao.buscar_por_titulo(q)  # Este método lo creás en tu DAO
+    resultados = dao.buscar_por_titulo(q)  # Método del DAO que retorna lista de dicts
 
-    return jsonify(resultados)
+    salida = []
+    for libro in resultados:
+        salida.append({
+            'id': libro.get('id'),
+            'titulo': libro.get('titulo'),
+            'autor': libro.get('autor', 'Desconocido'),
+            'url_detalle': url_for('infantil.infantilDetalle', id_libro=libro.get('id'))
+        })
+
+    return jsonify(salida)

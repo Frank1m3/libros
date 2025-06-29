@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gestión de Idiomas</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">
+        <img
+          src="/static/fotos/logo.jpg"
+          alt="Logo"
+          width="30"
+          height="24"
+          class="d-inline-block align-text-top"
+        />
+        DIGI-LIBROS
+      </a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('contactos.vista_contacto') }}">Contactos</a>
+          </li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('tienda') }}">Tienda</a></li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('registrar.registrar_index') }}">Registrar Libro</a>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              id="navbarDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              Categorías
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li>
+                <a class="dropdown-item" href="{{ url_for('infantil.infantilIndex') }}">Infantiles</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{{ url_for('novedad.novedadIndex') }}">Novedades</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{{ url_for('romance.romanceIndex') }}">Romance</a>
+              </li>
+            </ul>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              id="navbarDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              Referenciales
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" href="{{ url_for('autor.autorIndex') }}">Autor</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('editorial.editorialIndex') }}">Editoriales</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('tomo.tomoIndex') }}">Tomo</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('categoria.categoriaIndex') }}">Categorías</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('medida.medidaIndex') }}">Medidas</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('idioma.idiomaIndex') }}">Idiomas</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="#" id="verCarrito"
+              ><i class="fa-solid fa-cart-shopping"></i> Carrito (<span id="carritoCantidad">0</span>)</a
+            >
+          </li>
+        </ul>
+
+        <!-- Formulario de búsqueda (ahora primero y alineado a la derecha) -->
+        <form class="d-flex ms-auto" id="formBuscar" onsubmit="buscarLibros(event)">
+          <input
+            class="form-control me-2"
+            type="search"
+            placeholder="Buscar libros..."
+            name="query"
+            id="inputBuscar"
+          />
+          <button class="btn btn-outline-success" type="submit">Buscar</button>
+        </form>
+
+        <div id="resultadosBusqueda" class="mt-4"></div>
+
+        <!-- Usuario y logout (con margen a la izquierda para separarlo del formulario) -->
+        <ul class="navbar-nav ms-3">
+          {% if session.usuario_nombre %}
+          <li class="nav-item">
+            <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">
+              <i class="fa-solid fa-user"></i> {{ session.usuario_nombre }}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('login.logout') }}">
+              <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+            </a>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('login.login') }}">
+              <i class="fa-solid fa-right-to-bracket"></i> Iniciar sesión
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+  <!-- META con el token CSRF generado por Flask -->
+  <meta name="csrf-token" content="{{ csrf_token() }}" />
+</head>
+<body>
+
+<div class="container mt-4">
+  <h3>Gestión de Idiomas</h3>
+
+  <div class="card">
+    <div class="card-header">
+      <button type="button" class="btn btn-primary" id="btnAgregar">Agregar</button>
+    </div>
+    <div class="card-body">
+      <table class="table table-striped" id="tbl">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="modalFormulario"
+    tabindex="-1"
+    aria-labelledby="modalTitle"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle">Agregar Idioma</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Cerrar"
+          ></button>
+        </div>
+
+        <div class="modal-body">
+          <input type="hidden" id="txtIdIdioma" />
+          <div class="mb-3">
+            <label for="txtNombre" class="form-label">Nombre del idioma</label>
+            <input
+              type="text"
+              class="form-control"
+              id="txtNombre"
+              placeholder="Ingrese el nombre"
+            />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="btnGuardar">
+            Guardar
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cerrar
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  function getCSRFToken() {
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  }
+
+  const tablaIdiomas = $('#tbl').DataTable({
+    ajax: {
+      url: '/api/v1/idiomas',
+      dataSrc: 'data',
+    },
+    columns: [
+      { data: 'nombre' },
+      {
+        data: function (row) {
+          return `
+            <button class="btn btn-sm btn-primary btn-editar" data-id="${row.id}">Editar</button>
+            <button class="btn btn-sm btn-danger btn-eliminar" data-id="${row.id}">Eliminar</button>
+          `;
+        },
+        orderable: false,
+      },
+    ],
+    language: {
+      url: '/static/vendor/datatables/es-ES.json', // Asegúrate que el archivo exista o comenta esta línea
+    },
+  });
+
+  const modal = new bootstrap.Modal(document.getElementById('modalFormulario'));
+
+  $('#btnAgregar').on('click', () => {
+    $('#modalTitle').text('Agregar Idioma');
+    $('#txtIdIdioma').val('');
+    $('#txtNombre').val('');
+    modal.show();
+  });
+
+  $('#btnGuardar').on('click', () => {
+    const id = $('#txtIdIdioma').val();
+    const nombre = $('#txtNombre').val().trim().toUpperCase();
+
+    if (!nombre) {
+      Swal.fire('Error', 'El campo nombre es obligatorio.', 'warning');
+      return;
+    }
+
+    const url = id ? `/api/v1/idiomas/${id}` : '/api/v1/idiomas';
+    const method = id ? 'PUT' : 'POST';
+
+    fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken(),
+      },
+      body: JSON.stringify({ nombre }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          tablaIdiomas.ajax.reload(null, false);
+          modal.hide();
+          Swal.fire('Éxito', id ? 'Idioma actualizado' : 'Idioma agregado', 'success');
+        } else {
+          Swal.fire('Error', data.error || 'Error desconocido', 'error');
+        }
+      })
+      .catch(() => Swal.fire('Error', 'Error de red o del servidor.', 'error'));
+  });
+
+  $('#tbl').on('click', '.btn-editar', function () {
+    const id = $(this).data('id');
+    fetch(`/api/v1/idiomas/${id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          $('#modalTitle').text('Editar Idioma');
+          $('#txtIdIdioma').val(data.data.id);
+          $('#txtNombre').val(data.data.nombre);
+          modal.show();
+        } else {
+          Swal.fire('Error', data.error || 'No se pudo obtener el idioma', 'error');
+        }
+      })
+      .catch(() => Swal.fire('Error', 'No se pudo cargar el idioma.', 'error'));
+  });
+
+  $('#tbl').on('click', '.btn-eliminar', function () {
+    const id = $(this).data('id');
+    Swal.fire({
+      title: '¿Eliminar idioma?',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/api/v1/idiomas/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRFToken': getCSRFToken(),
+          },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              tablaIdiomas.ajax.reload(null, false);
+              Swal.fire('Eliminado', 'Idioma eliminado correctamente', 'success');
+            } else {
+              Swal.fire('Error', data.error || 'No se pudo eliminar', 'error');
+            }
+          })
+          .catch(() => Swal.fire('Error', 'No se pudo eliminar el idioma.', 'error'));
+      }
+    });
+  });
+</script>
+</body>
+</html>

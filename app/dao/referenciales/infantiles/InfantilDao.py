@@ -1,19 +1,18 @@
-from flask import current_app as app
+from flask import Blueprint, render_template, Response, url_for, abort, jsonify, request, current_app as app
 from app.conexion.Conexion import Conexion
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
+# Definición del blueprint
+infantilapi = Blueprint('infantilapi', __name__, template_folder='templates')
 
 class InfantilDao:
     CATEGORIA_ID = 2  # ID correspondiente a la categoría Infantil
 
     def get_todos(self):
-        """
-        Devuelve una lista de libros infantiles con todos los datos relacionados.
-        """
         sql = """
             SELECT 
-                l.id, l.titulo, l.descripcion, l.isbn, l.precio, l.stock,l.paginas,
+                l.id, l.titulo, l.descripcion, l.isbn, l.precio, l.stock, l.paginas,
                 a.nombre AS autor,
                 e.nombre AS editorial,
                 i.nombre AS idioma,
@@ -45,12 +44,9 @@ class InfantilDao:
             con.close()
 
     def get_por_id(self, id_libro):
-        """
-        Devuelve un libro infantil específico por ID con todos sus datos relacionados.
-        """
         sql = """
             SELECT 
-                l.id, l.titulo, l.descripcion, l.isbn, l.precio, l.stock,l.paginas,
+                l.id, l.titulo, l.descripcion, l.isbn, l.precio, l.stock, l.paginas,
                 a.nombre AS autor,
                 e.nombre AS editorial,
                 i.nombre AS idioma,
@@ -81,9 +77,6 @@ class InfantilDao:
             con.close()
 
     def obtener_imagen(self, id_libro):
-        """
-        Devuelve la imagen binaria del libro infantil.
-        """
         sql = "SELECT id, imagen FROM libros WHERE id = %s AND categoria_id = %s"
         conexion = Conexion()
         con = conexion.getConexion()
@@ -97,8 +90,8 @@ class InfantilDao:
         finally:
             cur.close()
             con.close()
+
     def buscar_por_titulo(self, texto):
-       
         sql = """
             SELECT 
                 l.id, l.titulo, a.nombre AS autor
@@ -120,3 +113,21 @@ class InfantilDao:
         finally:
             cur.close()
             con.close()
+
+# Ruta para búsqueda AJAX dentro del blueprint
+@infantilapi.route('/infantil/buscar-libros')
+def buscar_libros():
+    query = request.args.get('q', '').strip()
+    dao = InfantilDao()
+    resultados = []
+
+    if query:
+        libros = dao.buscar_por_titulo(query)
+        for libro in libros:
+            resultados.append({
+                'id': libro['id'],
+                'titulo': libro['titulo'],
+                'autor': libro.get('autor', 'Desconocido')
+            })
+
+    return jsonify(resultados)
