@@ -7,7 +7,6 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
-
 </head>
 <body>
 
@@ -47,7 +46,7 @@
   <div class="card-detalle">
     <div class="row g-4">
       <div class="col-md-5 text-center">
-        <img src="{{ url_for('infantil.obtener_imagen', id_libro=libro.id) }}"
+        <img src="{{ url_for('novedad.obtener_imagen', id_libro=libro.id) }}"
              alt="Portada de {{ libro.titulo }}" class="libro-img img-fluid" />
       </div>
       <div class="col-md-7">

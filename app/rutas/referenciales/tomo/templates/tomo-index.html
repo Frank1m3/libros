@@ -8,7 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <!-- Token CSRF para JS -->
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
     <a class="navbar-brand" href="/">
       <img
@@ -35,7 +35,7 @@
       <ul class="navbar-nav">
         <li class="nav-item"><a class="nav-link" href="{{ url_for('contactos.vista_contacto') }}">Contactos</a></li>
 
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('tienda') }}">Tienda</a></li>
+      
        <li class="nav-item">
         
   <a class="nav-link" href="{{ url_for('registrar.registrar_index') }}">Registrar Libro</a>
@@ -71,34 +71,40 @@
           </ul>
         </li>
         
-        <li class="nav-item dropdown">
-          <a
-            class="nav-link dropdown-toggle"
-            href="#"
-            id="navbarDropdown"
-            role="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            Referenciales
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li>
-              <a class="dropdown-item" href="{{ url_for('autor.autorIndex') }}"
-                >Autor</a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="{{ url_for('editorial.editorialIndex') }}"
-                >Editoriales</a
-              >
-            </li>
-            <li>
-              <a class="dropdown-item" href="{{ url_for('tomo.tomoIndex') }}"
-                >Tomo</a
-              >
-            </li>
-          </ul>
-        </li>
+      <li class="nav-item dropdown">
+  <a
+    class="nav-link dropdown-toggle"
+    href="#"
+    id="navbarDropdown"
+    role="button"
+    data-bs-toggle="dropdown"
+    aria-expanded="false"
+  >
+    Referenciales
+  </a>
+  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+    <li>
+      <a class="dropdown-item" href="{{ url_for('autor.autorIndex') }}">Autor</a>
+    </li>
+    <li>
+      <a class="dropdown-item" href="{{ url_for('categoria.categoriaIndex') }}">Categorías</a>
+    </li>
+    <li>
+      <a class="dropdown-item" href="{{ url_for('editorial.editorialIndex') }}">Editoriales</a>
+    </li>
+    <li>
+      <a class="dropdown-item" href="{{ url_for('medida.medidaIndex') }}">Medidas</a>
+    </li>
+    <li>
+      <a class="dropdown-item" href="{{ url_for('tomo.tomoIndex') }}">Tomo</a>
+    </li>
+     <li>
+      <a class="dropdown-item" href="{{ url_for('idioma.idiomaIndex') }}">Idiomas</a>
+    </li>
+    
+  </ul>
+</li>
+
         <li class="nav-item">
           <a class="nav-link" href="#" id="verCarrito"
             ><i class="fa-solid fa-cart-shopping"></i> Carrito (<span
@@ -109,6 +115,19 @@
         </li>
       </ul>
 
+      <!-- Formulario de búsqueda (ahora primero y alineado a la derecha) -->
+      <form class="d-flex ms-auto" id="formBuscar" onsubmit="buscarLibros(event)">
+  <input
+    class="form-control me-2"
+    type="search"
+    placeholder="Buscar libros..."
+    name="query"
+    id="inputBuscar"
+  />
+  <button class="btn btn-outline-success" type="submit">Buscar</button>
+</form>
+
+<div id="resultadosBusqueda" class="mt-4"></div>
 
       <!-- Usuario y logout (con margen a la izquierda para separarlo del formulario) -->
       <ul class="navbar-nav ms-3">
@@ -197,12 +216,12 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-  // Función para obtener el token CSRF desde la meta tag
+
   function getCSRFToken() {
     return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
   }
 
-  // Inicialización del DataTable
+
   const tablaTomos = $('#tbl').DataTable({
     ajax: {
       url: '/api/v1/tomos',
@@ -227,7 +246,7 @@
 
   const modal = new bootstrap.Modal(document.getElementById('modalFormulario'));
 
-  // Evento para mostrar modal de agregar
+ 
   $('#btnAgregar').on('click', () => {
     $('#modalTitle').text('Agregar Tomo');
     $('#txtIdTomo').val('');
@@ -236,7 +255,7 @@
     modal.show();
   });
 
-  // Evento para guardar (POST o PUT)
+  
   $('#btnGuardar').on('click', () => {
     const id = $('#txtIdTomo').val();
     const numero = $('#txtNumero').val();
@@ -270,7 +289,7 @@
     });
   });
 
-  // Evento para cargar datos y mostrar modal de edición
+  
   $('#tbl').on('click', '.btn-editar', function () {
     const id = $(this).data('id');
     fetch(`/api/v1/tomos/${id}`)
@@ -288,7 +307,7 @@
       });
   });
 
-  // Evento para eliminar tomo
+  
   $('#tbl').on('click', '.btn-eliminar', function () {
     const id = $(this).data('id');
     Swal.fire({

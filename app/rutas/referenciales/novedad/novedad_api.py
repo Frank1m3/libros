@@ -1,78 +1,60 @@
-from flask import Blueprint, request, jsonify, current_app as app
+from flask import Blueprint, render_template, Response, url_for, abort, jsonify, request
 from app.dao.referenciales.novedades.NovedadDao import NovedadDao
 
-novedadapi = Blueprint('novedadapi', __name__)
+# Definir el blueprint
+novedadapi = Blueprint('novedadapi', __name__, template_folder='templates')
 
-@novedadapi.route('/novedades', methods=['GET'])
-def getNovedades():
+# Ruta principal: mostrar todos los libros de novedades
+@novedadapi.route('/novedades')
+def novedad_index():
     dao = NovedadDao()
-    try:
-        data = dao.getTodos()
-        return jsonify({'success': True, 'data': data, 'error': None}), 200
-    except Exception as e:
-        app.logger.error(f"Error al obtener novedades: {str(e)}")
-        return jsonify({'success': False, 'error': 'Error interno.'}), 500
+    libros = dao.get_todos()
 
-@novedadapi.route('/novedades/<int:id_libro>', methods=['GET'])
-def getNovedad(id_libro):
-    dao = NovedadDao()
-    try:
-        libro = dao.getPorId(id_libro)
-        if libro:
-            return jsonify({'success': True, 'data': libro, 'error': None}), 200
-        else:
-            return jsonify({'success': False, 'error': 'Libro no encontrado.'}), 404
-    except Exception as e:
-        app.logger.error(f"Error al obtener novedad: {str(e)}")
-        return jsonify({'success': False, 'error': 'Error interno.'}), 500
-
-@novedadapi.route('/novedades', methods=['POST'])
-def addNovedad():
-    data = request.get_json()
-    campos = ['titulo', 'descripcion', 'precio', 'imagen']
+    for libro in libros:
+        libro['imagen_url'] = (
+            url_for('novedadapi.obtener_imagen', id_libro=libro['id'])
+            if 'id' in libro else url_for('static', filename='fotos/default.jpg')
+        )
     
-    for campo in campos:
-        if campo not in data or not data[campo]:
-            return jsonify({'success': False, 'error': f'Campo {campo} es obligatorio'}), 400
+    return render_template('novedades_index.html', libros=libros)
 
+# Ruta de detalle por ID de libro
+@novedadapi.route('/novedades/<int:id_libro>')
+def novedad_detalle(id_libro):
     dao = NovedadDao()
-    try:
-        id_libro = dao.insertarLibro(data['titulo'], data['descripcion'], data['precio'], data['imagen'])
-        if id_libro:
-            return jsonify({'success': True, 'data': {'id': id_libro}, 'error': None}), 201
-        else:
-            return jsonify({'success': False, 'error': 'No se pudo insertar.'}), 500
-    except Exception as e:
-        app.logger.error(f"Error al insertar novedad: {str(e)}")
-        return jsonify({'success': False, 'error': 'Error interno.'}), 500
+    libro = dao.get_por_id(id_libro)
 
-@novedadapi.route('/novedades/<int:id_libro>', methods=['PUT'])
-def updateNovedad(id_libro):
-    data = request.get_json()
-    campos = ['titulo', 'descripcion', 'precio', 'imagen']
+    if not libro:
+        abort(404, "Libro no encontrado")
 
-    for campo in campos:
-        if campo not in data or not data[campo]:
-            return jsonify({'success': False, 'error': f'Campo {campo} es obligatorio'}), 400
+    libro['imagen_url'] = url_for('novedadapi.obtener_imagen', id_libro=id_libro)
+    return render_template('novedades_detalle.html', libro=libro)
 
+# Ruta para obtener la imagen del libro
+@novedadapi.route('/novedades/imagen/<int:id_libro>')
+def obtener_imagen(id_libro):
     dao = NovedadDao()
-    try:
-        if dao.actualizarLibro(id_libro, data['titulo'], data['descripcion'], data['precio'], data['imagen']):
-            return jsonify({'success': True, 'data': {'id': id_libro}, 'error': None}), 200
-        else:
-            return jsonify({'success': False, 'error': 'No se pudo actualizar o no existe.'}), 404
-    except Exception as e:
-        app.logger.error(f"Error al actualizar novedad: {str(e)}")
-        return jsonify({'success': False, 'error': 'Error interno.'}), 500
+    fila = dao.obtener_imagen(id_libro)
 
-@novedadapi.route('/novedades/<int:id_libro>', methods=['DELETE'])
-def deleteNovedad(id_libro):
+    if not fila or not fila[1]:
+        abort(404, "Imagen no encontrada")
+
+    return Response(fila[1], mimetype='image/jpg')
+
+# Ruta AJAX para buscar libros por título usando DAO (más eficiente)
+@novedadapi.route('/novedades/buscar-libros')
+def buscar_libros():
+    query = request.args.get('q', '').strip()
     dao = NovedadDao()
-    try:
-        if dao.eliminarLibro(id_libro):
-            return jsonify({'success': True, 'mensaje': 'Eliminado correctamente.', 'error': None}), 200
-        else:
-            return jsonify({'success': False, 'error': 'No se encontró el libro o no se pudo eliminar.'}), 404
-    except Exception as e:
-        app.logger.error(f"Error al eliminar novedad: {str(e)}")
-        return jsonify({'success': False, 'error': 'Error interno.'}), 500
+    resultados = []
+
+    if query:
+        libros = dao.buscar_por_titulo(query)
+        for libro in libros:
+            resultados.append({
+                'id': libro['id'],
+                'titulo': libro['titulo'],
+                'autor': libro.get('autor', 'Autor desconocido')
+            })
+
+    return jsonify(resultados)

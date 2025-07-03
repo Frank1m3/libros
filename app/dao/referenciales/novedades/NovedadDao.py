@@ -1,146 +1,133 @@
-from flask import current_app as app
+from flask import Blueprint, jsonify, request, current_app as app
 from app.conexion.Conexion import Conexion
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
+# Definición del blueprint
+novedadapi = Blueprint('novedadapi', __name__, template_folder='templates')
 
 class NovedadDao:
-    def getTodos(self):
-        sql = """
-            SELECT id_libro, titulo, descripcion, precio, imagen
-            FROM libros_novedad
-            ORDER BY id_libro DESC
-        """
+    CATEGORIA_ID = 3  # ID correspondiente a la categoría Novedades
 
+    def get_todos(self):
+        sql = """
+            SELECT 
+                l.id, l.titulo, l.descripcion, l.isbn, l.precio, l.stock, l.paginas,
+                a.nombre AS autor,
+                e.nombre AS editorial,
+                i.nombre AS idioma,
+                m.ancho, m.alto, m.profundidad,
+                ed.numero AS edicion,
+                t.numero AS tomo,
+                t.descripcion AS descripcion_tomo
+            FROM libros l
+            LEFT JOIN autores a ON l.autor_id = a.id
+            LEFT JOIN editoriales e ON l.editorial_id = e.id
+            LEFT JOIN idiomas i ON l.idioma_id = i.id
+            LEFT JOIN medidas m ON l.medida_id = m.id
+            LEFT JOIN ediciones ed ON l.edicion_id = ed.id
+            LEFT JOIN tomos t ON l.tomo_id = t.id
+            WHERE l.categoria_id = %s
+            ORDER BY l.titulo
+        """
         conexion = Conexion()
         con = conexion.getConexion()
-        cur = con.cursor()
-
+        cur = con.cursor(cursor_factory=RealDictCursor)
         try:
-            cur.execute(sql)
-            resultados = cur.fetchall()
-            libros = []
-
-            for l in resultados:
-                libros.append({
-                    "id": l[0],
-                    "titulo": l[1],
-                    "descripcion": l[2],
-                    "precio": float(l[3]),
-                    "imagen": l[4]
-                })
-
-            return libros
-
+            cur.execute(sql, (self.CATEGORIA_ID,))
+            return cur.fetchall()
         except Exception as e:
-            app.logger.error(f"Error al obtener libros de novedad: {e}")
+            app.logger.error(f"[NovedadDao.get_todos] Error: {e}")
             return []
-
         finally:
             cur.close()
             con.close()
 
-    def getPorId(self, id_libro):
+    def get_por_id(self, id_libro):
         sql = """
-            SELECT id_libro, titulo, descripcion, precio, imagen
-            FROM libros_novedad
-            WHERE id_libro = %s
+            SELECT 
+                l.id, l.titulo, l.descripcion, l.isbn, l.precio, l.stock, l.paginas,
+                a.nombre AS autor,
+                e.nombre AS editorial,
+                i.nombre AS idioma,
+                m.ancho, m.alto, m.profundidad,
+                ed.numero AS edicion,
+                t.numero AS tomo,
+                t.descripcion AS descripcion_tomo
+            FROM libros l
+            LEFT JOIN autores a ON l.autor_id = a.id
+            LEFT JOIN editoriales e ON l.editorial_id = e.id
+            LEFT JOIN idiomas i ON l.idioma_id = i.id
+            LEFT JOIN medidas m ON l.medida_id = m.id
+            LEFT JOIN ediciones ed ON l.edicion_id = ed.id
+            LEFT JOIN tomos t ON l.tomo_id = t.id
+            WHERE l.id = %s AND l.categoria_id = %s
         """
-
         conexion = Conexion()
         con = conexion.getConexion()
-        cur = con.cursor()
-
+        cur = con.cursor(cursor_factory=RealDictCursor)
         try:
-            cur.execute(sql, (id_libro,))
-            l = cur.fetchone()
-
-            if l:
-                return {
-                    "id": l[0],
-                    "titulo": l[1],
-                    "descripcion": l[2],
-                    "precio": float(l[3]),
-                    "imagen": l[4]
-                }
+            cur.execute(sql, (id_libro, self.CATEGORIA_ID))
+            return cur.fetchone()
+        except Exception as e:
+            app.logger.error(f"[NovedadDao.get_por_id] Error: {e}")
             return None
+        finally:
+            cur.close()
+            con.close()
 
+    def obtener_imagen(self, id_libro):
+        sql = "SELECT id, imagen FROM libros WHERE id = %s AND categoria_id = %s"
+        conexion = Conexion()
+        con = conexion.getConexion()
+        cur = con.cursor()
+        try:
+            cur.execute(sql, (id_libro, self.CATEGORIA_ID))
+            return cur.fetchone()
         except Exception as e:
-            app.logger.error(f"Error al obtener libro por ID: {e}")
+            app.logger.error(f"[NovedadDao.obtener_imagen] Error: {e}")
             return None
-
         finally:
             cur.close()
             con.close()
 
-    def insertarLibro(self, titulo, descripcion, precio, imagen):
+    def buscar_por_titulo(self, texto):
         sql = """
-            INSERT INTO libros_novedad (titulo, descripcion, precio, imagen)
-            VALUES (%s, %s, %s, %s)
-            RETURNING id_libro
+            SELECT 
+                l.id, l.titulo, a.nombre AS autor
+            FROM libros l
+            LEFT JOIN autores a ON l.autor_id = a.id
+            WHERE l.categoria_id = %s AND LOWER(l.titulo) LIKE %s
+            ORDER BY l.titulo
+            LIMIT 10
         """
-
         conexion = Conexion()
         con = conexion.getConexion()
-        cur = con.cursor()
-
+        cur = con.cursor(cursor_factory=RealDictCursor)
         try:
-            cur.execute(sql, (titulo, descripcion, precio, imagen))
-            id_libro = cur.fetchone()[0]
-            con.commit()
-            return id_libro
-
+            cur.execute(sql, (self.CATEGORIA_ID, f"%{texto.lower()}%"))
+            return cur.fetchall()
         except Exception as e:
-            app.logger.error(f"Error al insertar libro: {e}")
-            con.rollback()
-            return None
-
+            app.logger.error(f"[NovedadDao.buscar_por_titulo] Error: {e}")
+            return []
         finally:
             cur.close()
             con.close()
 
-    def actualizarLibro(self, id_libro, titulo, descripcion, precio, imagen):
-        sql = """
-            UPDATE libros_novedad
-            SET titulo = %s, descripcion = %s, precio = %s, imagen = %s
-            WHERE id_libro = %s
-        """
+# Ruta para búsqueda AJAX
+@novedadapi.route('/novedades/buscar-libros')
+def buscar_libros():
+    query = request.args.get('q', '').strip()
+    dao = NovedadDao()
+    resultados = []
 
-        conexion = Conexion()
-        con = conexion.getConexion()
-        cur = con.cursor()
+    if query:
+        libros = dao.buscar_por_titulo(query)
+        for libro in libros:
+            resultados.append({
+                'id': libro['id'],
+                'titulo': libro['titulo'],
+                'autor': libro.get('autor', 'Desconocido')
+            })
 
-        try:
-            cur.execute(sql, (titulo, descripcion, precio, imagen, id_libro))
-            con.commit()
-            return cur.rowcount > 0
-
-        except Exception as e:
-            app.logger.error(f"Error al actualizar libro: {e}")
-            con.rollback()
-            return False
-
-        finally:
-            cur.close()
-            con.close()
-
-    def eliminarLibro(self, id_libro):
-        sql = """
-            DELETE FROM libros_novedad
-            WHERE id_libro = %s
-        """
-
-        conexion = Conexion()
-        con = conexion.getConexion()
-        cur = con.cursor()
-
-        try:
-            cur.execute(sql, (id_libro,))
-            con.commit()
-            return cur.rowcount > 0
-
-        except Exception as e:
-            app.logger.error(f"Error al eliminar libro: {e}")
-            con.rollback()
-            return False
-
-        finally:
-            cur.close()
-            con.close()
+    return jsonify(resultados)
